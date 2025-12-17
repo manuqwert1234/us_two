@@ -46,7 +46,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDmj6S_0ZHN5ybzida_Y3xCp4Uk1vm4IwE',
+    apiKey: 'YOUR_API_KEY_HERE',
     appId: '1:231927538230:android:3107329bb74160bf7dee97',
     messagingSenderId: '231927538230',
     projectId: 'our-cycle-tracker',
