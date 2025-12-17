@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "231927538230",
+    "project_id": "our-cycle-tracker",
+    "storage_bucket": "our-cycle-tracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231927538230:android:3107329bb74160bf7dee97",
+        "android_client_info": {
+          "package_name": "com.mesu.mesu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmj6S_0ZHN5ybzida_Y3xCp4Uk1vm4IwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
