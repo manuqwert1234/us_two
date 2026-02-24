@@ -1,0 +1,28 @@
+# ── Stage 1: Build ─────────────────────────────────────────────────────────────
+FROM golang:1.21-alpine AS builder
+
+RUN apk add --no-cache git protobuf protobuf-dev
+
+WORKDIR /build
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest \
+    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest \
+    && protoc \
+        --go_out=proto --go_opt=paths=source_relative \
+        --go-grpc_out=proto --go-grpc_opt=paths=source_relative \
+        proto/titan.proto
+
+RUN CGO_ENABLED=0 GOOS=linux go build -o /worker ./cmd/worker
+
+# ── Stage 2: Runtime ───────────────────────────────────────────────────────────
+FROM alpine:3.19
+
+COPY --from=builder /worker /worker
+
+# Entrypoint reads env vars set by docker-compose
+CMD ["/bin/sh", "-c", "/worker --manager=${MANAGER_ADDR} --id=${WORKER_ID}"]

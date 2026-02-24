@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package titan;
+
+option go_package = "github.com/adithyanca/titan/proto";
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum TaskStatus {
+  TASK_STATUS_UNKNOWN   = 0;
+  TASK_STATUS_PENDING   = 1;
+  TASK_STATUS_RUNNING   = 2;
+  TASK_STATUS_COMPLETED = 3;
+  TASK_STATUS_FAILED    = 4;
+}
+
+enum WorkerStatus {
+  WORKER_STATUS_UNKNOWN  = 0;
+  WORKER_STATUS_IDLE     = 1;
+  WORKER_STATUS_BUSY     = 2;
+  WORKER_STATUS_DEAD     = 3;
+}
+
+// ─── Task Messages ────────────────────────────────────────────────────────────
+
+message Task {
+  string id         = 1;
+  string command    = 2;
+  TaskStatus status = 3;
+  string worker_id  = 4;
+  string output     = 5;
+  int32  exit_code  = 6;
+  int64  created_at = 7; // unix timestamp
+  int64  updated_at = 8;
+  int32  timeout_s  = 9;  // execution timeout in seconds, 0 = unlimited
+  int32  retry_count = 10; // how many times this task has been retried
+  int32  max_retries = 11; // max retries allowed (default 3)
+}
+
+message SubmitTaskRequest {
+  string command     = 1;
+  int32  timeout_s   = 2; // timeout in seconds, 0 = no timeout
+  int32  max_retries = 3; // max retries, 0 = use server default
+}
+
+message SubmitTaskResponse {
+  string task_id = 1;
+  string message = 2;
+}
+
+message GetTaskRequest {
+  string task_id = 1;
+}
+
+message GetTaskResponse {
+  Task task = 1;
+}
+
+message ListTasksRequest {
+  TaskStatus filter_status = 1; // UNKNOWN means "all"
+}
+
+message ListTasksResponse {
+  repeated Task tasks = 1;
+}
+
+// ─── Worker Registration ──────────────────────────────────────────────────────
+
+message RegisterWorkerRequest {
+  string worker_id = 1;
+  string address   = 2; // host:port the worker listens on
+}
+
+message RegisterWorkerResponse {
+  bool   accepted    = 1;
+  string message     = 2;
+  int32  heartbeat_interval_s = 3; // Manager tells worker how often to pulse
+}
+
+// ─── Heartbeat (Pulse) ────────────────────────────────────────────────────────
+
+message PulseRequest {
+  string worker_id     = 1;
+  WorkerStatus status  = 2;
+  string current_task  = 3; // task_id currently executing, empty if idle
+}
+
+message PulseResponse {
+  bool   ok      = 1;
+  Task   new_task = 2; // Manager pushes a task assignment in the ack
+}
+
+// ─── Task Result Reporting ────────────────────────────────────────────────────
+
+message ReportTaskResultRequest {
+  string worker_id  = 1;
+  string task_id    = 2;
+  bool   success    = 3;
+  string output     = 4;
+  int32  exit_code  = 5;
+}
+
+message ReportTaskResultResponse {
+  bool ok = 1;
+}
+
+// ─── Cluster Status ───────────────────────────────────────────────────────────
+
+message ClusterStatusRequest {}
+
+message WorkerInfo {
+  string       worker_id    = 1;
+  string       address      = 2;
+  WorkerStatus status       = 3;
+  string       current_task = 4;
+  int64        last_seen    = 5; // unix timestamp
+}
+
+message ClusterStatusResponse {
+  repeated WorkerInfo workers = 1;
+  int32 pending_tasks         = 2;
+  int32 running_tasks         = 3;
+  int32 completed_tasks       = 4;
+  int32 failed_tasks          = 5;
+}
+
+// ─── Services ─────────────────────────────────────────────────────────────────
+
+// ManagerService: exposed to CLI clients and Workers
+service ManagerService {
+  // Client-facing RPCs
+  rpc SubmitTask    (SubmitTaskRequest)    returns (SubmitTaskResponse);
+  rpc GetTask       (GetTaskRequest)       returns (GetTaskResponse);
+  rpc ListTasks     (ListTasksRequest)     returns (ListTasksResponse);
+  rpc ClusterStatus (ClusterStatusRequest) returns (ClusterStatusResponse);
+
+  // Worker-facing RPCs
+  rpc RegisterWorker    (RegisterWorkerRequest)    returns (RegisterWorkerResponse);
+  rpc Pulse             (PulseRequest)             returns (PulseResponse);
+  rpc ReportTaskResult  (ReportTaskResultRequest)  returns (ReportTaskResultResponse);
+}

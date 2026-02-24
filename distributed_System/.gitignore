@@ -1,0 +1,31 @@
+# Binaries
+bin/
+
+# Proto generated files (regenerate with `make proto`)
+# proto/*.pb.go
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# Docker
+.docker/
+
+# Temp / logs
+/tmp/
+*.log
