@@ -4,8 +4,6 @@
 
 **"Sync your cycles. Strengthen your connection."**
 
-![App Preview](https://via.placeholder.com/800x400/40E0D0/ffffff?text=Us+Two+App+Preview)  
-*(Add screenshots here later)*
 
 ## ✨ Features
 
@@ -38,9 +36,6 @@
 - **Google Fonts**
 - **Shorebird** (for easy over-the-air updates)
 
-## 📸 Screenshots
-
-*(Add 4–6 screenshots here — Login, Role selection, Dashboard, Calendar, etc.)*
 
 ## 🚀 Getting Started
 
